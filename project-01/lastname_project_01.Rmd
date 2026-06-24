@@ -7,11 +7,146 @@ output:
     toc_float: true
 ---
 
-# Data Visualization Project 01
+# Motivations
 
-_revised version of mini-project 01 goes here_
+I work with fuel data weekly, and I get a report from the EIA that had the diesel prices of the week. Working in transportation, fuel is a big part of the business, and clients always want to see how the market is responding to the recent geopolitical events. There were big spikes in response to it, and I would like to see if the fuel market's spikes as per the 1984-2017 fuel economy data produced during vehicle testing at the Environmental Protection Agency’s (EPA) National Vehicle and Fuel Emissions Laboratory also has spikes related to important events. I would imagine so, but: even though that was my original motivation, instead I found that this data does not answer that kind of curiosity, which is *okay*. 
+
+# The Data
 
 ```{r}
-# Test Push: Success
+library(tidyverse) # loading library
+fuel <- read_csv("https://raw.githubusercontent.com/aalhamadani/datasets/refs/heads/main/fuel.csv", col_types = cols()) # reading the data
+```
+
+## Question 1: What is the combined miles per gallon by model year?
+
+```{r}
+year_summary <- fuel %>%
+  group_by(year) %>% # group the dataset by year
+  summarise(
+    avg_mpg = mean(combined_mpg_ft1, na.rm = TRUE) # calculate the average of the combined miles per gallon that reflects a weighted average of both city and highway fuel economy ratings as avg_mpg
+  ) %>%
+  mutate( # make some new columns to calculate
+    prev_mpg = lag(avg_mpg), # a column that returns the previous year's avg_mpg
+    mpg_change = avg_mpg - prev_mpg, # a column that has the difference of the current year and previous year avg_mpg
+    pct_change = (avg_mpg / prev_mpg - 1) * 100 # the percent change of that difference
+  )
+
+year_summary
+```
+```{r}
+year_summary %>%
+  filter(year > 2005) #noticing that 2008 is the start of an explosive trend of larger percent increases
+```
+```{r}
+mean_pct_change <- year_summary %>%
+  filter(year > 2007) %>%
+  summarise(mean_pct_change = mean(pct_change, na.rm = TRUE))
+
+mean_pct_change
+```
+```{r}
+sd_pct_change <- year_summary %>%
+  filter(year > 2007) %>%
+  summarise(std_pct_change = sd(pct_change, na.rm = TRUE))
+
+sd_pct_change
+```
+```{r}
+sd_pct_change/mean_pct_change # tells us that the standard deviation of percent change of mpg after 2007 is 83% of the mean suggesting unstable rate of growth, not exactly exponential because it was otherwise be closer to 0% 
+```
+
+
+```{r}
+# Pull specific values for annotations
+start_val <- year_summary %>% filter(year == min(year)) # the first point of the graph's data, the earliest year's avg_mpg
+end_val   <- year_summary %>% filter(year == max(year)) # the second point of the graph's data, the latest year's avg_mpg
+```
+
+
+```{r}
+start_val
+```
+
+
+```{r}
+end_val
+```
+
+
+
+```{r}
+library(ggplot2)
+library(plotly)
+
+p <- year_summary %>%
+  ggplot(aes(x = year, y = avg_mpg)) + # year on x, average combined mpg on y
+  geom_line() + # line graph in black
+  geom_smooth(se = FALSE) + # smoothed trend line in blue and removing the confidence interval
+  geom_vline(xintercept = 2008, linetype = "dashed", color = "red") + # a dashed, red, vertical line at the year 2008
+  annotate("text", x = 2003.5, y = 20.8, label = "Efficiency upturn of 2008 →",
+           hjust = -0.05, size = 3, color = "gray30") +
+  annotate("text", x = start_val$year, y = start_val$avg_mpg + 0.4,
+           label = paste0(round(start_val$avg_mpg, 1), " MPG"), size = 3) +
+  annotate("text", x = end_val$year + 1, y = end_val$avg_mpg - .25,
+           label = paste0(round(end_val$avg_mpg, 1), " MPG"), size = 3) +
+  theme_minimal() +
+  labs(title = "Average combined MPG by model year",
+       x = "Year",
+       y = "Combined MPG")
+
+ggplotly(p)
+```
+
+I chose to be more interested in the combined MPG metric because gas prices will fluctuate and inflate over time. I wanted to see the MPG increase over the years that cars were made, and you can see that barely right at 2008 of the both lines, where there is a turning point in the smoothed line like the right half of a "U" shape that you see in a graph of an exponential function, marking it as the point of the beginning of a positive trend of cars' gas efficiency. After 2007, there was an average yearly percentage increase of 2.65% with a standard deviation of 2.2%, indicating an unstable rate of positive growth, though we cannot call it exponential growth because the standard deviation of the rate is not close enough to zero.
+
+## Question 2: How does Combined MPG perform for the different vehicle classes?
+
+```{r}
+library(plotly)
+library(dplyr)
+
+# Build summary stats per class for clean tooltips
+class_stats <- fuel %>%
+  filter(!is.na(class)) %>%
+  group_by(class) %>%
+  summarise(
+    median_mpg = median(combined_mpg_ft1, na.rm = TRUE),
+    q1 = quantile(combined_mpg_ft1, 0.25, na.rm = TRUE),
+    q3 = quantile(combined_mpg_ft1, 0.75, na.rm = TRUE),
+    min_mpg = min(combined_mpg_ft1, na.rm = TRUE),
+    max_mpg = max(combined_mpg_ft1, na.rm = TRUE),
+    n = n()
+  ) %>%
+  arrange(median_mpg) # sort by median so order matches the plot
+
+
+# Build one trace per class so tooltips are clean
+plot_ly() %>%
+  add_trace(
+    data = fuel %>% filter(!is.na(class)),
+    type = "box",
+    x = ~combined_mpg_ft1,
+    y = ~reorder(class, combined_mpg_ft1, median),
+    orientation = "h",
+    hovertemplate = paste(
+      "<b>%{y}</b><br>",
+      "Median: %{median}<br>",
+      "Q1–Q3: %{q1}–%{q3}<br>",
+      "Range: %{lowerfence}–%{upperfence}<extra></extra>"
+    ),
+    marker = list(color = "steelblue", opacity = 0.6),
+    line = list(color = "steelblue")
+  ) %>%
+
+  layout(
+    title = "Combined MPG by vehicle class",
+    xaxis = list(title = "Combined MPG"),
+    yaxis = list(title = ""),
+    height = 1000,  # tall enough to give each class breathing room
+    margin = list(l = 200),
+    showlegend = TRUE,
+    legend = list(orientation = "h", y = -0.08)
+  )
 ```
 
