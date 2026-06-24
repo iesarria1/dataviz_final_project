@@ -45,16 +45,12 @@ weather_tpa %>%
   ggplot(aes(x = max_temp, fill = month_name)) +
   geom_histogram(binwidth = 3, color = "white", show.legend = FALSE) +
   facet_wrap(~ month_name, ncol = 4) +
-  scale_fill_viridis_d() +
-  theme_gray() +
-  theme(
-    strip.background = element_rect(fill = "gray30"),
-    strip.text = element_text(color = "white", face = "bold", size = 11)
-  ) +
+  scale_x_continuous(n.breaks = 6) +
+  theme_bw() +
   labs(
-    title = "Distribution of Maximum Temperatures by Month",
-    x = "Maximum temperatures",
-    y = "Number of Days"
+    title = "Distribution of Monthlty Max Temperatures",
+    x = "Max temperatures",
+    y = "# of Days"
   )
 ```
 
