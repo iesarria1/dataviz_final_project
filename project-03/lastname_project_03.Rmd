@@ -36,6 +36,29 @@ knitr::include_graphics("https://raw.githubusercontent.com/aalhamadani/dataviz_f
 
 Hint: the option `binwidth = 3` was used with the `geom_histogram()` function.
 
+```{r}
+library(ggplot2)
+library(dplyr)
+
+weather_tpa %>%
+  mutate(month_name = factor(month.name[month], levels = month.name)) %>%
+  ggplot(aes(x = max_temp, fill = month_name)) +
+  geom_histogram(binwidth = 3, color = "white", show.legend = FALSE) +
+  facet_wrap(~ month_name, ncol = 4) +
+  scale_fill_viridis_d() +
+  theme_gray() +
+  theme(
+    strip.background = element_rect(fill = "gray30"),
+    strip.text = element_text(color = "white", face = "bold", size = 11)
+  ) +
+  labs(
+    title = "Distribution of Maximum Temperatures by Month",
+    x = "Maximum temperatures",
+    y = "Number of Days"
+  )
+```
+
+
 (b) Create a plot like the one below:
 
 ```{r, echo = FALSE, out.width="80%", fig.align='center'}
