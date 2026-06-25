@@ -29,10 +29,10 @@ sample_n(weather_tpa, 4)
 ## # A tibble: 4 × 7
 ##    year month   day precipitation max_temp min_temp ave_temp
 ##   <dbl> <dbl> <dbl>         <dbl>    <dbl>    <dbl>    <dbl>
-## 1  2022    12    11          0          70       64     67  
-## 2  2022     8     3          0.98       92       76     84  
-## 3  2022    10    31          0          86       70     78  
-## 4  2022     3    26          0          81       60     70.5
+## 1  2022     6    23          0          93       79       86
+## 2  2022     4    30          1.56       87       67       77
+## 3  2022     6     2          1.6        91       73       82
+## 4  2022    12    30          0          81       61       71
 ```
 
 See Slides from Week 4 of Visualizing Relationships and Models (slide 10) for a reminder on how to use this type of dataset with the `lubridate` package for dates and times (example included in the slides uses data from 2016).
@@ -71,6 +71,19 @@ weather_tpa %>%
 
 <img src="https://raw.githubusercontent.com/aalhamadani/dataviz_final_project/main/figures/tpa_max_temps_density.png" alt="" width="80%" style="display: block; margin: auto;" />
 
+``` r
+weather_tpa %>%
+  ggplot(aes(x = max_temp)) +
+  geom_density(bw = 0.5, fill = "gray40", color = "black") +
+  theme_minimal() +
+  labs(
+    x = "Maximum temperature",
+    y = "density"
+  )
+```
+
+![](lastname_project_03_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
+
 Hint: check the `kernel` parameter of the `geom_density()` function, and use `bw = 0.5`.
 
 (c) Create a plot like the one below:
@@ -79,12 +92,71 @@ Hint: check the `kernel` parameter of the `geom_density()` function, and use `bw
 
 Hint: default options for `geom_density()` were used. 
 
+
+``` r
+weather_tpa %>%
+  mutate(month_name = factor(month.name[month], levels = month.name)) %>%
+  ggplot(aes(x = max_temp, fill = month_name)) +
+  geom_density(color = "black", show.legend = FALSE) +
+  facet_wrap(~ month_name, ncol = 4) +
+  scale_fill_viridis_d() +
+  theme_gray() +
+  theme(
+    strip.background = element_rect(fill = "gray70"),
+    strip.text = element_text(color = "black", size = 11)
+  ) +
+  labs(
+    title = "Density plots for each month in 2022",
+    x = "Maximum temperatures",
+    y = "density"
+  )
+```
+
+![](lastname_project_03_files/figure-html/unnamed-chunk-7-1.png)<!-- -->
+
+
 (d) Generate a plot like the chart below:
 
 
 <img src="https://raw.githubusercontent.com/aalhamadani/dataviz_final_project/main/figures/tpa_max_temps_ridges_plasma.png" alt="" width="80%" style="display: block; margin: auto;" />
 
 Hint: use the`{ggridges}` package, and the `geom_density_ridges()` function paying close attention to the `quantile_lines` and `quantiles` parameters. The plot above uses the `plasma` option (color scale) for the _viridis_ palette.
+
+
+``` r
+library(ggridges)
+```
+
+```
+## Warning: package 'ggridges' was built under R version 4.5.3
+```
+
+``` r
+weather_tpa %>%
+  mutate(month_name = factor(month.name[month], levels = month.name)) %>%
+  ggplot(aes(x = max_temp, y = month_name, fill = after_stat(x))) +
+  geom_density_ridges_gradient(
+    quantile_lines = TRUE,
+    quantiles = 2,        # 2 = median only; use c(0.25, 0.5, 0.75) for quartiles
+    color = "black",
+    scale = 1.5
+  ) +
+  scale_fill_viridis_c(option = "plasma") +
+  scale_x_continuous(limits = c(50, 110)) +
+  theme_minimal() +
+  theme(legend.position = "right") +
+  labs(
+    x = "Maximum temperature (in Fahrenheit degrees)",
+    y = NULL,
+    fill = NULL
+  )
+```
+
+```
+## Picking joint bandwidth of 1.87
+```
+
+![](lastname_project_03_files/figure-html/unnamed-chunk-9-1.png)<!-- -->
 
 
 (e) Create a plot of your choice that uses the attribute for precipitation _(values of -99.9 for temperature or -99.99 for precipitation represent missing data)_.

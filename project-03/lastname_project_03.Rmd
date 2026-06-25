@@ -110,6 +110,29 @@ knitr::include_graphics("https://raw.githubusercontent.com/aalhamadani/dataviz_f
 
 Hint: use the`{ggridges}` package, and the `geom_density_ridges()` function paying close attention to the `quantile_lines` and `quantiles` parameters. The plot above uses the `plasma` option (color scale) for the _viridis_ palette.
 
+```{r}
+library(ggridges)
+
+weather_tpa %>%
+  mutate(month_name = factor(month.name[month], levels = month.name)) %>%
+  ggplot(aes(x = max_temp, y = month_name, fill = after_stat(x))) +
+  geom_density_ridges_gradient(
+    quantile_lines = TRUE,
+    quantiles = 2,        # 2 = median only; use c(0.25, 0.5, 0.75) for quartiles
+    color = "black",
+    scale = 1.5
+  ) +
+  scale_fill_viridis_c(option = "plasma") +
+  scale_x_continuous(limits = c(50, 110)) +
+  theme_minimal() +
+  theme(legend.position = "right") +
+  labs(
+    x = "Maximum temperature (in Fahrenheit degrees)",
+    y = NULL,
+    fill = NULL
+  )
+```
+
 
 (e) Create a plot of your choice that uses the attribute for precipitation _(values of -99.9 for temperature or -99.99 for precipitation represent missing data)_.
 
