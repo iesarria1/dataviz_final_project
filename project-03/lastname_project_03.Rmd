@@ -136,23 +136,6 @@ weather_tpa %>%
 (e) Create a plot of your choice that uses the attribute for precipitation _(values of -99.9 for temperature or -99.99 for precipitation represent missing data)_.
 
 
-```{r}
-
-library(dplyr)
-weather_tpa %>%
-  mutate(
-    precipitation = ifelse(precipitation == -99.99, NA, precipitation),
-    month_name = factor(month.name[month], levels = month.name)
-  ) %>%
-  ggplot(aes(x = month_name, y = precipitation)) +
-  geom_boxplot(fill = "skyblue", color = "black") +
-  theme_minimal() +
-  labs(
-    title = "Monthly Precipitation Distribution (Missing values removed)",
-    x = "Month",
-    y = "Precipitation"
-  )
-```
 
 ```{r}
 library(plotly)
@@ -195,58 +178,61 @@ Make sure to include a copy of the dataset in the `data/` folder, and reference 
 
 (to get the "raw" data from any of the links listed above, simply click on the `raw` button of the GitHub page and copy the URL to be able to read it in your computer using the `read_csv()` function)
 
+```{r}
 
-### Option (B): Data on Concrete Strength 
+prof_rates <- read_csv("https://raw.githubusercontent.com/aalhamadani/dataviz_final_project/main/data/rmp_wit_comments.csv") #called rmp_mit_comments.csv in the data file
 
-Concrete is the most important material in **civil engineering**. The concrete compressive strength is a highly nonlinear function of _age_ and _ingredients_. The dataset used here is from the [UCI Machine Learning Repository](https://archive.ics.uci.edu/ml/index.php), and it contains 1030 observations with 9 different attributes 9 (8 quantitative input variables, and 1 quantitative output variable). A data dictionary is included below: 
-
-
-Variable                      |    Notes                
-------------------------------|-------------------------------------------
-Cement                        | kg in a $m^3$ mixture             
-Blast Furnace Slag            | kg in a $m^3$ mixture  
-Fly Ash                       | kg in a $m^3$ mixture             
-Water                         | kg in a $m^3$ mixture              
-Superplasticizer              | kg in a $m^3$ mixture
-Coarse Aggregate              | kg in a $m^3$ mixture
-Fine Aggregate                | kg in a $m^3$ mixture      
-Age                           | in days                                             
-Concrete compressive strength | MPa, megapascals
-
-
-Below we read the `.csv` file using `readr::read_csv()` (the `readr` package is part of the `tidyverse`)
+prof_rates
+```
 
 ```{r}
-concrete <- read_csv("../data/concrete.csv", col_types = cols())
+
+sentiment <- prof_rates %>%
+  unnest_tokens(word, comments, token = "ngrams", n=2) %>%
+  mutate(
+    course = str_trunc(course,
+width = 15)
+  )
+
+ 
+
+sentiment
 ```
 
 
-Let us create a new attribute for visualization purposes, `strength_range`: 
 
 ```{r}
-new_concrete <- concrete %>%
-  mutate(strength_range = cut(Concrete_compressive_strength, 
-                              breaks = quantile(Concrete_compressive_strength, 
-                                                probs = seq(0, 1, 0.2))) )
+library(tidytext)
+
+prof_rates_sentiment <- prof_rates %>%
+  unnest_tokens(word, comments) %>%
+  
+  mutate(word_count = row_number(),
+         index = word_count %/% 500 + 1) %>%
+  
+  inner_join(get_sentiments("bing"), by = "word") %>%
+  
+  count(index, sentiment) %>%
+  
+  pivot_wider(names_from = sentiment, values_from = n, values_fill = 0) %>%
+  
+  mutate(net_sentiment = positive - negative)
+prof_rates_sentiment
+
+
 ```
 
-
-
-1. Explore the distribution of 2 of the continuous variables available in the dataset. Do ranges make sense? Comment on your findings.
-
-2. Use a _temporal_ indicator such as the one available in the variable `Age` (measured in days). Generate a plot similar to the one shown below. Comment on your results.
-
-```{r, echo = FALSE, out.width="80%", fig.align='center'}
-knitr::include_graphics("https://raw.githubusercontent.com/aalhamadani/dataviz_final_project/main/figures/concrete_strength.png")
+```{r}
+ggplot(prof_rates_sentiment,
+       aes(x = index, y = net_sentiment)) +
+  geom_col(fill = "steelblue") +
+  theme_minimal() +
+  labs(
+    title = "Sentiment Flow in Professor Reviews",
+    x = "Text Segment (every ~500 words)",
+    y = "Net Sentiment (Positive - Negative)"
+  )
 ```
-
-
-3. Create a scatterplot similar to the one shown below. Pay special attention to which variables are being mapped to specific aesthetics of the plot. Comment on your results. 
-
-```{r, echo = FALSE, out.width="80%", fig.align='center'}
-knitr::include_graphics("https://raw.githubusercontent.com/aalhamadani/dataviz_final_project/main/figures/cement_plot.png")
-```
-
 
 
 
