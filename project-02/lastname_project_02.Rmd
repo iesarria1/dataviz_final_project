@@ -9,4 +9,180 @@ output:
 
 # Data Visualization Project 02
 
-_revised version of mini-project 02 goes here_
+# Introduction and Learning The Data
+
+The original motivation of this analysis was me thinking about the fact that in Florida, it tends to rain in the hottest days of the year which would be during the Summer. The main question is: Do high temperatures cause precipitation in Atlanta? If it is not high temperatures, what are some other factors? Using a dataset of Atlanta's daily wetaher in 2019, what questions could we answer?
+
+
+
+```{r}
+library(tidyverse)
+library(readr)
+
+atl_weather <- read_csv("https://raw.githubusercontent.com/iesarria1/data_viz_project/refs/heads/main/atl-weather.csv") # Reading the csv from the data folder in my Git because I did not see the file in the professor's Git
+```
+
+```{r}
+colnames(atl_weather) # Looking at column names
+```
+
+```{r}
+head(atl_weather) # Looking at the first six rows
+```
+```{r}
+glimpse(atl_weather) # Glimpse of data
+```
+As of the start of this project, I am planning on seeing if there is a relationship between average temperatures and precipitation probability in Atlanta using an scatterplot. I would also like to make two spatial visualizations of the average temperatures and chances of precipitation throughout the Atlanta area. Finally, I would like to do a regression model to see what are the predictors of precipitation. The wrangling I will need to do here to get that result is create a new column that takes the temperatureHigh and the temperatureLow of each day and find the daily average temperature, as I think that will be a more balanced approach in this analysis.
+
+```{r}
+atl_weather <- atl_weather %>%
+  mutate( 
+    avgTemp = (temperatureLow + temperatureHigh) / 2 #making a new column in the data, avgTemp 
+  )
+```
+
+
+# Average Temperature and Probability of Precipitation
+
+```{r}
+atl_weather %>% # I wanted to break up the average temperatures into different intervals
+  mutate(
+    temp_bin = cut( # This creates a new column called temp_bin, that cuts the avgTemp into intervals, or bins
+      avgTemp, # Defining avgTemp as the data to cut
+      breaks = seq(20, 100, by = 10) # starts the cutting sequence at 20 and end it at 100 with a moving peg of 10
+    )
+  ) %>%
+  group_by(temp_bin) %>%  # Now grouping by the bins 
+  summarise(
+    avg_precip_probability = mean(precipProbability, na.rm = TRUE),# Calculates and displays the average of the precipitation probability in each bin 
+    avg_temp = mean(avgTemp, na.rm = TRUE), # Calculates and displays the average of the temperature midpoints in each bin
+    n = n() # Counts the number of observations in the bin
+  )
+```
+
+It is already starting to look like the 40-50 degrees range is associated with the strongest probability of precipitation, but not much in comparison to the other intervals. I want to say that this could be due to snow more so than it has to do with rain, but the 30-40 degrees range has an average probability of 13% less, and I would be guessing that it is definitely snowing then. Let's continue.
+
+
+```{r}
+library(plotly)
+
+
+plot_ly(atl_weather, x = ~avgTemp, y = ~precipProbability, type = "scatter", mode = "markers") # makes an interactive scatterplot with markets that has avgTemp on the Y axis and precipProbability on the X axis
+
+```
+We are not really seeing much of a story here. Let's add some context, but we are going to have to wrangle a bit more here. This will help me later using colors to create meaning encodings of the seasons.
+
+```{r}
+library(dplyr)
+
+atl_weather <- atl_weather %>%
+  mutate(
+    season = case_when( # making a new column that returns a season base on IFS statements of the month in the time field
+      format(as.Date(time), "%m") %in% c("12", "01", "02") ~ "Winter",
+      format(as.Date(time), "%m") %in% c("03", "04", "05") ~ "Spring",
+      format(as.Date(time), "%m") %in% c("06", "07", "08") ~ "Summer",
+      format(as.Date(time), "%m") %in% c("09", "10", "11") ~ "Fall"
+    )
+  )
+```
+
+```{r}
+library(ggplot2)
+
+
+plot <- ggplotly(ggplot(atl_weather, aes(x = avgTemp, y = precipProbability, color = season)) +
+  geom_point() +
+  geom_smooth( method = "loess", se = FALSE, color = "black") + theme_minimal())
+
+plot %>%
+  layout(
+    annotations = list(
+
+      list(
+        x = 55,
+        y = 0.45,
+        text = "Start of decline towards flattening",
+        showarrow = TRUE,
+        arrowhead = 2,
+        ax = -40,
+        ay = -40
+      ),
+
+      list(
+        x = 73,
+        y = 0.44,
+        text = "End of flattening, start of decrease",
+        showarrow = TRUE,
+        arrowhead = 2,
+        ax = 30,
+        ay = 30
+      )
+
+    )
+  )
+  
+```
+
+We can now see this a lot better. Still no strong relationship between the two variables, but we can see the relationship with context of which season each data point belongs to. Summer is tight around 80 degrees, Fall and Spring blend in together in a large range from 50-75 degrees, and then the Winter is mostly under 60 degrees. The smoothed line also helps see the small relationship that does exist. We observe similar troughs on the coldest days, and more so on the hottest days. Stray from the 50-73 degrees range, and the chances of rain begin to decline, as that range holds mostly flat of about 43% chance of precipitation. The two annotated points on the trend line, are actually peaks of the chance of rain and they respectively mark the start and end of the flattened. Regardless, it doesn't tell a great story. Despite what we experience in Florida, the state with a similar client doesn't show more favorable chances of the rain in the summer. Precipitation on average is most prevalent during the days of Fall, Spring, and Winter.
+
+These next two graphs I believe is another way to see what I am trying to say when you compare the two with each other.
+
+```{r}
+ggplotly(
+  ggplot(atl_weather, aes(y = precipProbability, x = time,color = season)) +
+    geom_point() +
+    geom_smooth(method = "loess", se = FALSE, color = "black") +
+    theme_minimal()
+)
+
+```
+
+```{r}
+ggplotly(
+  ggplot(atl_weather, aes(y = avgTemp, x = time,color = season)) +
+    geom_point() +
+    geom_smooth(method = "loess", se = FALSE, color = "black") +
+    theme_minimal()
+)
+```
+
+
+# The Shapefile Search
+
+```{r}
+getwd()
+```
+
+```{r}
+list.files("../data")
+```
+
+
+```{r}
+
+library(sf)
+
+ga_shape <- st_read("../data/georgia_shapefiles")
+colnames(ga_shape)
+
+
+```
+
+```{r}
+glimpse(ga_shape)
+```
+
+
+
+```{r}
+ggplot()+
+  geom_sf(data=ga_shape, aes(fill = AWATER)) + #using the shapefile defined as ga_shape, I graphed the state of Georiga and filled it by the water area of each subdivision
+  coord_sf(crs = "+proj=merc") + # adjusted the projection
+  theme_minimal() # applied the minimal theme
+```
+
+I am happy I was finally able to figure out how to do this using a shapefile from the internet and storing it in the project folder, but it gave me nothing to join on with the original dataset I used. I searched for almost two hours for a better online shapefile, maybe something more pertaining to only Atlanta, but I couldn't really find anything that I was able to download. I couldn't find any metadata either that was able to tell me what the columns represented. My best guess was water area, but the maps I have found of Georgia's rivers don't help me in believing that. I got this data from Data.gov![https://catalog.data.gov/dataset/tiger-line-shapefile-2019-state-georgia-current-county-subdivision-state-based]. Ideally, I would have liked to find data I could join on to make two maps: one filled by average temperature the whole year, and one by average probability of precipitation for the whole year.
+
+See the image below from Geology.com for reference:
+
+![](https://geology.com/state-map/maps/georgia-rivers-map.gif)
