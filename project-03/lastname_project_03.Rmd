@@ -60,6 +60,16 @@ weather_tpa %>%
 ```{r, echo = FALSE, out.width="80%", fig.align='center'}
 knitr::include_graphics("https://raw.githubusercontent.com/aalhamadani/dataviz_final_project/main/figures/tpa_max_temps_density.png")
 ```
+```{r}
+weather_tpa %>%
+  ggplot(aes(x = max_temp)) +
+  geom_density(bw = 0.5, fill = "gray40", color = "black") +
+  theme_minimal() +
+  labs(
+    x = "Maximum temperature",
+    y = "density"
+  )
+```
 
 Hint: check the `kernel` parameter of the `geom_density()` function, and use `bw = 0.5`.
 
@@ -70,6 +80,26 @@ knitr::include_graphics("https://raw.githubusercontent.com/aalhamadani/dataviz_f
 ```
 
 Hint: default options for `geom_density()` were used. 
+
+```{r}
+weather_tpa %>%
+  mutate(month_name = factor(month.name[month], levels = month.name)) %>%
+  ggplot(aes(x = max_temp, fill = month_name)) +
+  geom_density(color = "black", show.legend = FALSE) +
+  facet_wrap(~ month_name, ncol = 4) +
+  scale_fill_viridis_d() +
+  theme_gray() +
+  theme(
+    strip.background = element_rect(fill = "gray70"),
+    strip.text = element_text(color = "black", size = 11)
+  ) +
+  labs(
+    title = "Density plots for each month in 2022",
+    x = "Maximum temperatures",
+    y = "density"
+  )
+```
+
 
 (d) Generate a plot like the chart below:
 

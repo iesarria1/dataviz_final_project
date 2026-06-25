@@ -29,10 +29,10 @@ sample_n(weather_tpa, 4)
 ## # A tibble: 4 × 7
 ##    year month   day precipitation max_temp min_temp ave_temp
 ##   <dbl> <dbl> <dbl>         <dbl>    <dbl>    <dbl>    <dbl>
-## 1  2022     3    28             0       83       67     75  
-## 2  2022     6    17             0       97       80     88.5
-## 3  2022     4    25             0       90       71     80.5
-## 4  2022     1    17             0       66       56     61
+## 1  2022    12    11          0          70       64     67  
+## 2  2022     8     3          0.98       92       76     84  
+## 3  2022    10    31          0          86       70     78  
+## 4  2022     3    26          0          81       60     70.5
 ```
 
 See Slides from Week 4 of Visualizing Relationships and Models (slide 10) for a reminder on how to use this type of dataset with the `lubridate` package for dates and times (example included in the slides uses data from 2016).
@@ -44,6 +44,28 @@ Using the 2022 data:
 <img src="https://raw.githubusercontent.com/aalhamadani/dataviz_final_project/main/figures/tpa_max_temps_facet.png" alt="" width="80%" style="display: block; margin: auto;" />
 
 Hint: the option `binwidth = 3` was used with the `geom_histogram()` function.
+
+
+``` r
+library(ggplot2)
+library(dplyr)
+
+weather_tpa %>%
+  mutate(month_name = factor(month.name[month], levels = month.name)) %>%
+  ggplot(aes(x = max_temp, fill = month_name)) +
+  geom_histogram(binwidth = 3, color = "white", show.legend = FALSE) +
+  facet_wrap(~ month_name, ncol = 4) +
+  scale_x_continuous(n.breaks = 6) +
+  theme_bw() +
+  labs(
+    title = "Distribution of Monthlty Max Temperatures",
+    x = "Max temperatures",
+    y = "# of Days"
+  )
+```
+
+![](lastname_project_03_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
+
 
 (b) Create a plot like the one below:
 
