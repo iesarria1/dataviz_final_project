@@ -18,7 +18,25 @@ library(tidyverse) # loading library
 fuel <- read_csv("https://raw.githubusercontent.com/aalhamadani/datasets/refs/heads/main/fuel.csv", col_types = cols()) # reading the data
 ```
 
-## Question 1: What is the combined miles per gallon by model year?
+## Question 1: What is the combined miles per gallon by model year? (BEFORE)
+
+```{r}
+fuel %>%
+  group_by(year) %>% # grouping by make year
+  summarise(avg_mpg = mean(combined_mpg_ft1, na.rm = TRUE)) %>% #calculating average of combined MPG, and removing NAs
+  ggplot(aes(x = year, y = avg_mpg)) + #placing year on x axis and average combined MPG on y axis
+  geom_line() + #line graph
+  theme_minimal()+ #theme
+  geom_smooth() + #creating a trend line to minimize noise in variation
+  labs(title = "Average combined MPG by model year", x = "Year", y = "Combined MPG") #labels
+```
+I chose to be more interested in the combined MPG metric because gas prices will fluctuate and inflate over time. I wanted to see the MPG increase over the years that cars were made, and you can see that barely right before 2005, there turning point like right half of a "U" shape that you see in a graph of an exponential function, marking it the point exponential increase of cars' gas efficiency. 
+
+
+## Question 1: What is the combined miles per gallon by model year? (AFTER)
+
+
+> The changes I made to this graph post feedbacks included easy edits like making the graph interactive, fixing up some messy writing, and adding annotations to the graph. The most latter of those three changes were as per the feedback. The more involved challenge was the statisitcal work to produce meaningful annotations and to give my interpretation more quantative support. Although these changes may seem small, it gave the graph more context to tell a more informed story.
 
 ```{r}
 year_summary <- fuel %>%
@@ -84,11 +102,11 @@ p <- year_summary %>%
   geom_line() + # line graph in black
   geom_smooth(se = FALSE) + # smoothed trend line in blue and removing the confidence interval
   geom_vline(xintercept = 2008, linetype = "dashed", color = "red") + # a dashed, red, vertical line at the year 2008
-  annotate("text", x = 2003.5, y = 20.8, label = "Efficiency upturn of 2008 →",
+  annotate("text", x = 2003.5, y = 20.8, label = "Efficiency upturn of 2008 →", # an annotation of the vline
            hjust = -0.05, size = 3, color = "gray30") +
-  annotate("text", x = start_val$year, y = start_val$avg_mpg + 0.4,
-           label = paste0(round(start_val$avg_mpg, 1), " MPG"), size = 3) +
-  annotate("text", x = end_val$year + 1, y = end_val$avg_mpg - .25,
+  annotate("text", x = start_val$year, y = start_val$avg_mpg + 0.4, #annotation at starting value with some adjustments
+           label = paste0(round(start_val$avg_mpg, 1), " MPG"), size = 3) + #making label the rounded starting value and " MPG"
+  annotate("text", x = end_val$year + 1, y = end_val$avg_mpg - .25, #making label the rounded ending value and " MPG"
            label = paste0(round(end_val$avg_mpg, 1), " MPG"), size = 3) +
   theme_minimal() +
   labs(title = "Average combined MPG by model year",
@@ -98,55 +116,7 @@ p <- year_summary %>%
 ggplotly(p)
 ```
 
-I chose to be more interested in the combined MPG metric because gas prices will fluctuate and inflate over time. I wanted to see the MPG increase over the years that cars were made, and you can see that barely right at 2008 of the both lines, where there is a turning point in the smoothed line like the right half of a "U" shape that you see in a graph of an exponential function, marking it as the point of the beginning of a positive trend of cars' gas efficiency. After 2007, there was an average yearly percentage increase of 2.65% with a standard deviation of 2.2%, indicating an unstable rate of positive growth, though we cannot call it exponential growth because the standard deviation of the rate is not close enough to zero.
-
-## Question 2: How does Combined MPG perform for the different vehicle classes?
-
-```{r}
-library(plotly)
-library(dplyr)
-
-# Build summary stats per class for clean tooltips
-class_stats <- fuel %>%
-  filter(!is.na(class)) %>%
-  group_by(class) %>%
-  summarise(
-    median_mpg = median(combined_mpg_ft1, na.rm = TRUE),
-    q1 = quantile(combined_mpg_ft1, 0.25, na.rm = TRUE),
-    q3 = quantile(combined_mpg_ft1, 0.75, na.rm = TRUE),
-    min_mpg = min(combined_mpg_ft1, na.rm = TRUE),
-    max_mpg = max(combined_mpg_ft1, na.rm = TRUE),
-    n = n()
-  ) %>%
-  arrange(median_mpg) # sort by median so order matches the plot
+I chose to be more interested in the combined MPG metric because gas prices will fluctuate and inflate over time. I wanted to see the MPG increase over the years that cars were made, and you can see that right at 2008 of both lines. More easily seen in the smoothed blue line, at 2008 there is a turning point in the as the right half of a "U" shape that you see in a graph of an exponential function would have, marking it as the point of the beginning of a positive trend of cars' gas efficiency. After 2007, there was an average yearly percentage increase of 2.65% with a standard deviation of 2.2%. The standard deviation being 83% of the average indicates an unstable rate of positive growth, though we cannot call it exponential growth because the standard deviation of the rate is not close enough to zero.
 
 
-# Build one trace per class so tooltips are clean
-plot_ly() %>%
-  add_trace(
-    data = fuel %>% filter(!is.na(class)),
-    type = "box",
-    x = ~combined_mpg_ft1,
-    y = ~reorder(class, combined_mpg_ft1, median),
-    orientation = "h",
-    hovertemplate = paste(
-      "<b>%{y}</b><br>",
-      "Median: %{median}<br>",
-      "Q1–Q3: %{q1}–%{q3}<br>",
-      "Range: %{lowerfence}–%{upperfence}<extra></extra>"
-    ),
-    marker = list(color = "steelblue", opacity = 0.6),
-    line = list(color = "steelblue")
-  ) %>%
-
-  layout(
-    title = "Combined MPG by vehicle class",
-    xaxis = list(title = "Combined MPG"),
-    yaxis = list(title = ""),
-    height = 1000,  # tall enough to give each class breathing room
-    margin = list(l = 200),
-    showlegend = TRUE,
-    legend = list(orientation = "h", y = -0.08)
-  )
-```
 
