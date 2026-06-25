@@ -63,7 +63,7 @@ knitr::include_graphics("https://raw.githubusercontent.com/aalhamadani/dataviz_f
 ```{r}
 weather_tpa %>%
   ggplot(aes(x = max_temp)) +
-  geom_density(bw = 0.5, fill = "gray40", color = "black") +
+  geom_density( fill = "gray40", color = "black") +
   theme_minimal() +
   labs(
     x = "Maximum temperature",
@@ -87,10 +87,9 @@ weather_tpa %>%
   ggplot(aes(x = max_temp, fill = month_name)) +
   geom_density(color = "black", show.legend = FALSE) +
   facet_wrap(~ month_name, ncol = 4) +
-  scale_fill_viridis_d() +
-  theme_gray() +
+  theme_light() +
   theme(
-    strip.background = element_rect(fill = "gray70"),
+    strip.background = element_rect(fill = "gray80"),
     strip.text = element_text(color = "black", size = 11)
   ) +
   labs(
@@ -136,6 +135,42 @@ weather_tpa %>%
 
 (e) Create a plot of your choice that uses the attribute for precipitation _(values of -99.9 for temperature or -99.99 for precipitation represent missing data)_.
 
+
+```{r}
+
+library(dplyr)
+weather_tpa %>%
+  mutate(
+    precipitation = ifelse(precipitation == -99.99, NA, precipitation),
+    month_name = factor(month.name[month], levels = month.name)
+  ) %>%
+  ggplot(aes(x = month_name, y = precipitation)) +
+  geom_boxplot(fill = "skyblue", color = "black") +
+  theme_minimal() +
+  labs(
+    title = "Monthly Precipitation Distribution (Missing values removed)",
+    x = "Month",
+    y = "Precipitation"
+  )
+```
+
+```{r}
+library(plotly)
+
+p <- weather_tpa %>%
+  mutate(precipitation = na_if(precipitation, -99.99)) %>%
+  ggplot(aes(x = ave_temp, y = precipitation)) +
+  geom_point(alpha = 0.4) +
+  geom_smooth(method = "loess", color = "red", se = FALSE) +
+  theme_minimal() +
+  labs(
+    title = "Relationship Between Temperature and Precipitation",
+    x = "Average Temperature",
+    y = "Precipitation"
+  )
+
+ggplotly(p)
+```
 
 
 ## PART 2 
