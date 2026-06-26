@@ -8,11 +8,11 @@ The following is a sample of products created during the _"Data Visualization an
 
 ## Project 01
 
-In the project_01/ folder, I explore fuel data in transportation and regularly analyze EIA diesel price reports, where I’ve observed price spikes linked to geopolitical events. This project started with the idea of checking whether similar spike patterns appear in historical EPA fuel economy testing data, but I found that the dataset doesn’t really support that question, even though it motivated the analysis.
+In the `project_01/` folder, I explore fuel data in transportation and regularly analyze EIA diesel price reports, where I’ve observed price spikes linked to geopolitical events. This project started with the idea of checking whether similar spike patterns appear in historical EPA fuel economy testing data, but I found that the dataset doesn’t really support that question, even though it motivated the analysis.
 
 **Sample data visualization:** 
 
-_[include your favorite visualization from this project here]_
+_[My Favorite Visualization from Project 01]_
 <img src="https://github.com/iesarria1/dataviz_final_project/blob/main/figures/p.png">
 
 
@@ -22,10 +22,9 @@ In this project, I explored if high temperatures or other weather conditions cau
 
 **Sample data visualization:** 
 
-_[include your favorite visualization from this project here]_
+_[My Favorite Visualization from Project 02]_
 <img src="https://github.com/iesarria1/dataviz_final_project/blob/main/figures/facet%20graph.png">
 
-(you can place your figures in the `figures/` folder and use the `![](path_to_picture)` option to add the pictures here)
 
 
 ## Project 03
@@ -34,7 +33,7 @@ In this project, I explored the trend of maximum temperatures in Tampa in 2022 w
 
 **Sample data visualization:** 
 
-_[include your favorite visualization from this project here]_
+_[My Favorite Visualization from Project 03]_
 <img src="https://github.com/iesarria1/dataviz_final_project/blob/main/figures/cool%20graph.png">
 
 
