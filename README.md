@@ -23,7 +23,7 @@ In this project, I explored if high temperatures or other weather conditions cau
 **Sample data visualization:** 
 
 _[include your favorite visualization from this project here]_
-<img src="https://raw.githubusercontent.com/aalhamadani/dataviz_final_project/main/figures/fl_higher_ed.png" width="80%" height="80%">
+<img src="https://github.com/iesarria1/dataviz_final_project/blob/main/figures/facet%20graph.png">
 
 (you can place your figures in the `figures/` folder and use the `![](path_to_picture)` option to add the pictures here)
 
