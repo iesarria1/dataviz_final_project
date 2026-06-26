@@ -1,6 +1,6 @@
 # Data Visualization and Reproducible Research
 
-> Firstname Lastname. 
+> Isaiah Sarria 
 
 
 The following is a sample of products created during the _"Data Visualization and Reproducible Research"_ course.
@@ -8,7 +8,7 @@ The following is a sample of products created during the _"Data Visualization an
 
 ## Project 01
 
-In the `project_01/` folder you can find... _[add short description of your revised project here]_
+In the project_01/ folder, I explore fuel data in transportation and regularly analyze EIA diesel price reports, where I’ve observed price spikes linked to geopolitical events. This project started with the idea of checking whether similar spike patterns appear in historical EPA fuel economy testing data, but I found that the dataset doesn’t really support that question, even though it motivated the analysis.
 
 **Sample data visualization:** 
 
