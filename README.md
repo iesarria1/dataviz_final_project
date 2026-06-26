@@ -35,7 +35,7 @@ In this project, I explored the trend of maximum temperatures in Tampa in 2022 w
 **Sample data visualization:** 
 
 _[include your favorite visualization from this project here]_
-<img src="https://raw.githubusercontent.com/aalhamadani/dataviz_final_project/main/figures/concrete_density.png" width="80%" height="80%">
+<img src="https://github.com/iesarria1/dataviz_final_project/blob/main/figures/cool%20graph.png">
 
 
 ### Moving Forward
