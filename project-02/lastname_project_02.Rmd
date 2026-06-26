@@ -186,3 +186,39 @@ I am happy I was finally able to figure out how to do this using a shapefile fro
 See the image below from Geology.com for reference:
 
 ![](https://geology.com/state-map/maps/georgia-rivers-map.gif)
+
+
+> Since I didn't get any clear feedback up to this point for this project,I just thought about the piece of feedback of using more statistics instead of visual representations. So I went ahead produced two graphs below. I was starting to form the opinion that the graphs I made were too noisy and the interpretation that was in good faith is likely to lose the audience. I needed something more simple or something more separated to tell a better story, despite some of the scatterplots being good practice.
+
+```{r}
+atl_weather %>%
+  group_by(season) %>% # group data by season
+  summarise(
+    avg_precip = mean(precipProbability, na.rm = TRUE), # get average precipitation probability per season
+    n = n() # count number of observations in each season
+  ) %>%
+  ggplot(aes(x = season, y = avg_precip)) + # season on x-axis, avg precip on y-axis
+  geom_col(fill = "steelblue") + # bar chart showing average precipitation
+  geom_text(aes(label = round(avg_precip, 2)), vjust = -0.5) + # add values on top of bars
+  theme_minimal() + #minimal theme
+  labs(
+    title = "Average Precipitation Probability by Season", 
+    x = "Season",
+    y = "Precipitation Probability" )
+```
+
+This graph here really shocked me to see. It is saying the opposite of what I had observed earlier. I suggested that Fall and Spring had the highest chance of rain, but a simple graph is already telling me a clearer story. Summer actually does have the highest chance of rain just like in Florida. Graphing probability by temperature and encoding the points by season sounded good in theory, but trying to visually gauge the points alignment along with the temperature and the colors of the points encoding seasons ultimately led to me misleading myself and exposing some bias toward a story I must've subconsciously wanted to tell. Simple and effective is king here.
+
+
+```{r}
+ggplot(atl_weather, aes(x = avgTemp, y = precipProbability, color = season)) +
+  geom_point(alpha = 0.4) + # scatterplot showing relationship between temp and precipitation
+  geom_smooth(se = FALSE, method = "loess", color = "black") + # smoothed trend line to highlight overall pattern
+  facet_wrap(~season) + # split into separate panels for each season to make patterns clearer
+  theme_minimal() + # minimal theme for readability
+  labs(
+    title = "Temperature vs Precipitation by Season", 
+    x = "Average Temperature",
+    y = "Precipitation Probability" )
+```
+I appreciate this view more, and I would describe it as an improved version of one of the plots earlier in the report. It helps see the distribution of the observations more neatly throughout the progression of each season. You can still tell that Winter and Summer have the highest chances of rains, despite being totally opposite seasons. That was the message I failed to find in my less organized plots. If I could say one bad thing about this graph is that it makes it hard to determine which season has more rain, Winter or Summer? The histogram goes straight to the point when answering that question.
