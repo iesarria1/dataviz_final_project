@@ -41,14 +41,15 @@ library(ggplot2)
 library(dplyr)
 
 weather_tpa %>%
-  mutate(month_name = factor(month.name[month], levels = month.name)) %>%
-  ggplot(aes(x = max_temp, fill = month_name)) +
-  geom_histogram(binwidth = 3, color = "white", show.legend = FALSE) +
-  facet_wrap(~ month_name, ncol = 4) +
-  scale_x_continuous(n.breaks = 6) +
-  theme_bw() +
+  
+  mutate(month_name = factor(month.name[month], levels = month.name)) %>% # turn month numbers into ordered month names
+  ggplot(aes(x = max_temp, fill = month_name)) + # max temp on x, fill by month
+  geom_histogram(binwidth = 3, color = "white", show.legend = FALSE) + # histogram with 3-degree bins
+  facet_wrap(~ month_name, ncol = 4) + # split into separate plots for each month
+  scale_x_continuous(n.breaks = 6) + # make x-axis a bit less cluttered
+  theme_bw() + # simple black and white theme
   labs(
-    title = "Distribution of Monthlty Max Temperatures",
+    title = "Distribution of Monthly Max Temperatures",
     x = "Max temperatures",
     y = "# of Days"
   )
@@ -62,12 +63,12 @@ knitr::include_graphics("https://raw.githubusercontent.com/aalhamadani/dataviz_f
 ```
 ```{r}
 weather_tpa %>%
-  ggplot(aes(x = max_temp)) +
-  geom_density( fill = "gray40", color = "black") +
-  theme_minimal() +
+  ggplot(aes(x = max_temp)) + # max temp on x-axis
+  geom_density(fill = "gray40", color = "black") + # density curve with gray fill and black outline
+  theme_minimal() + # simple clean theme
   labs(
-    x = "Maximum temperature",
-    y = "density"
+    x = "Maximum temperature", # x-axis label
+    y = "density" # y-axis label
   )
 ```
 
@@ -83,20 +84,19 @@ Hint: default options for `geom_density()` were used.
 
 ```{r}
 weather_tpa %>%
-  mutate(month_name = factor(month.name[month], levels = month.name)) %>%
-  ggplot(aes(x = max_temp, fill = month_name)) +
-  geom_density(color = "black", show.legend = FALSE) +
-  facet_wrap(~ month_name, ncol = 4) +
-  theme_light() +
+  mutate(month_name = factor(month.name[month], levels = month.name)) %>% # turn month numbers into ordered month names
+  ggplot(aes(x = max_temp, fill = month_name)) + # max temp on x, fill by month
+  geom_density(color = "black", show.legend = FALSE) + # density plot with black outline
+  facet_wrap(~ month_name, ncol = 4) + # separate plot for each month
+  theme_light() + # light theme instead of default
   theme(
-    strip.background = element_rect(fill = "gray80"),
-    strip.text = element_text(color = "black", size = 11)
+    strip.background = element_rect(fill = "gray80"), # gray background for facet labels
+    strip.text = element_text(color = "black", size = 11) # format facet label text
   ) +
   labs(
-    title = "Density plots for each month in 2022",
-    x = "Maximum temperatures",
-    y = "density"
-  )
+    title = "Density plots for each month in 2022", # main title
+    x = "Maximum temperatures", 
+    y = "density" )
 ```
 
 
@@ -113,22 +113,22 @@ Hint: use the`{ggridges}` package, and the `geom_density_ridges()` function payi
 library(ggridges)
 
 weather_tpa %>%
-  mutate(month_name = factor(month.name[month], levels = month.name)) %>%
-  ggplot(aes(x = max_temp, y = month_name, fill = after_stat(x))) +
+  mutate(month_name = factor(month.name[month], levels = month.name)) %>% # make month names ordered Jan to Dec
+  ggplot(aes(x = max_temp, y = month_name, fill = after_stat(x))) + # temp on x, month on y, fill based on temp values
   geom_density_ridges_gradient(
-    quantile_lines = TRUE,
-    quantiles = 2,        # 2 = median only; use c(0.25, 0.5, 0.75) for quartiles
-    color = "black",
-    scale = 1.5
+    quantile_lines = TRUE, # show median line inside each ridge
+    quantiles = 2, # just median 
+    color = "black", # outline color
+    scale = 1.5 # controls how spaced out the ridges are
   ) +
-  scale_fill_viridis_c(option = "plasma") +
-  scale_x_continuous(limits = c(50, 110)) +
-  theme_minimal() +
-  theme(legend.position = "right") +
+  scale_fill_viridis_c(option = "plasma") + # color gradient for fill
+  scale_x_continuous(limits = c(50, 110)) + # limit x-axis range
+  theme_minimal() + # clean minimal theme
+  theme(legend.position = "right") + # move legend to the right side
   labs(
-    x = "Maximum temperature (in Fahrenheit degrees)",
-    y = NULL,
-    fill = NULL
+    x = "Maximum temperature (in Fahrenheit degrees)", 
+    y = NULL, # no y-axis label
+    fill = NULL # no legend title
   )
 ```
 
@@ -141,24 +141,26 @@ weather_tpa %>%
 library(plotly)
 
 p <- weather_tpa %>%
-  mutate(precipitation = na_if(precipitation, -99.99)) %>%
-  ggplot(aes(x = ave_temp, y = precipitation)) +
-  geom_point(alpha = 0.4) +
-  geom_smooth(method = "loess", color = "red", se = FALSE) +
-  theme_minimal() +
+  mutate(precipitation = na_if(precipitation, -99.99)) %>% # replace fake missing values with NA
+  ggplot(aes(x = ave_temp, y = precipitation)) + # average temp on x, precipitation on y
+  geom_point(alpha = 0.4) + # scatterplot with lighter points so overlap is easier to see
+  geom_smooth(method = "loess", color = "red", se = FALSE) + # smooth trend line in red
+  theme_minimal() + # clean minimal theme
   labs(
-    title = "Relationship Between Temperature and Precipitation",
+    title = "Relationship Between Temperature and Precipitation", 
     x = "Average Temperature",
-    y = "Precipitation"
+    y = "Precipitation" 
   )
 
-ggplotly(p)
+ggplotly(p) # turn static ggplot into interactive plotly chart
 ```
+
+Not sure if I am expected to speak to this, but despite the very flat line here suggesting no significant relationship between Average Temperature and Precipitation, there was still an increase of correlation at the end. This initially I thought that this might be Florida data like as I had assumed a relationship like this in my other analysis. I was happy to find out that the "tpa" in the dataset's name actually referred to Tampa. Although it is not a strong relationship, I could still see the confidence interval tightening (when I enable it).
 
 
 ## PART 2 
 
-> **You can choose to work on either Option (A) or Option (B)**. Remove from this template the option you decided not to work on. 
+
 
 
 ### Option (A): Visualizing Text Data
@@ -186,14 +188,12 @@ prof_rates
 ```
 
 ```{r}
-
+library(tidytext)
 sentiment <- prof_rates %>%
-  unnest_tokens(word, comments, token = "ngrams", n=2) %>%
+  unnest_tokens(word, comments, token = "ngrams", n = 2) %>% # split comments into 2-word n-grams
   mutate(
-    course = str_trunc(course,
-width = 15)
+    course = str_trunc(course, width = 15) # shorten course names so they fit better in plots/tables
   )
-
  
 
 sentiment
@@ -202,21 +202,24 @@ sentiment
 
 
 ```{r}
-library(tidytext)
+
 
 prof_rates_sentiment <- prof_rates %>%
-  unnest_tokens(word, comments) %>%
+  unnest_tokens(word, comments) %>% # split comments into individual words
   
-  mutate(word_count = row_number(),
-         index = word_count %/% 500 + 1) %>%
+  mutate(
+    word_count = row_number(), # running word count
+    index = word_count %/% 500 + 1 # group words into chunks of 500
+  ) %>%
   
-  inner_join(get_sentiments("bing"), by = "word") %>%
+  inner_join(get_sentiments("bing"), by = "word") %>% # add sentiment labels (positive/negative)
   
-  count(index, sentiment) %>%
+  count(index, sentiment) %>% # count sentiment words per chunk
   
-  pivot_wider(names_from = sentiment, values_from = n, values_fill = 0) %>%
+  pivot_wider(names_from = sentiment, values_from = n, values_fill = 0) %>% # spread into wide format
   
-  mutate(net_sentiment = positive - negative)
+  mutate(net_sentiment = positive - negative) # calculate overall sentiment score
+
 prof_rates_sentiment
 
 
@@ -224,13 +227,13 @@ prof_rates_sentiment
 
 ```{r}
 ggplot(prof_rates_sentiment,
-       aes(x = index, y = net_sentiment)) +
-  geom_col(fill = "steelblue") +
-  theme_minimal() +
+       aes(x = index, y = net_sentiment)) + # segment index on x, net sentiment on y
+  geom_col(fill = "steelblue") + # bar chart showing sentiment per segment
+  theme_minimal() + # minimal theme
   labs(
-    title = "Sentiment Flow in Professor Reviews",
-    x = "Text Segment (every ~500 words)",
-    y = "Net Sentiment (Positive - Negative)"
+    title = "Sentiment Flow in Professor Reviews", # plot title
+    x = "Text Segment (every ~500 words)", # x-axis label
+    y = "Net Sentiment (Positive - Negative)" # y-axis label
   )
 ```
 
