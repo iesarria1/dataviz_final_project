@@ -30,7 +30,7 @@ _[include your favorite visualization from this project here]_
 
 ## Project 03
 
-In this project, I explored ... _[short description of the data visualizations you for this part of the project produced goes here]_
+In this project, I explored the trend of maximum temperatures in Tampa in 2022 with different kinds of graphs, the relationship between temperature and precipitation, and a visualization of sentiment towards a professor from RateMyProfessor.com.
 
 **Sample data visualization:** 
 
